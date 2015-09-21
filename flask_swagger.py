@@ -97,7 +97,7 @@ def swagger(app, process_doc=_sanitize):
     We go through all endpoints of the app searching for swagger endpoints
     We provide the minimum required data according to swagger specs
     Callers can and should add and override at will
-    
+
     Arguments:
     app -- the flask app to inspect
 
@@ -138,6 +138,10 @@ def swagger(app, process_doc=_sanitize):
                 params = swag.get('parameters', [])
                 defs = _extract_definitions(params)
                 responses = swag.get('responses', {})
+                responses = {
+                    str(key): value
+                    for key, value in responses.items()
+                }
                 if responses is not None:
                     defs = defs + _extract_definitions(responses.values())
                 for definition in defs:
