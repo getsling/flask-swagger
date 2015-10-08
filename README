@@ -95,7 +95,7 @@ object in the
 object.
 
 `Schema <https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject>`__
-objects can be defined in a definitions section within the docstrings (see group object above) or within responses or parameters (see user object above). We alo support schema objects nested within the properties of other __
+objects can be defined in a definitions section within the docstrings (see group object above) or within responses or parameters (see user object above). We alo support schema objects nested within the properties of other
 `Schema <https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject>`__
 objects. An example is shown above with the address property of User.
 
