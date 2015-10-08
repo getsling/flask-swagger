@@ -135,8 +135,10 @@ def swagger(app, process_doc=_sanitize):
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
+                defs = swag.get('definitions', [])
+                defs = _extract_definitions(defs)
                 params = swag.get('parameters', [])
-                defs = _extract_definitions(params)
+                defs += _extract_definitions(params)
                 responses = swag.get('responses', {})
                 responses = {
                     str(key): value
