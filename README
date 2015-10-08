@@ -24,6 +24,13 @@ objects.
             ---
             tags:
               - users
+            definitions:
+              - schema:
+                  id: Group
+                  properties:
+                    name:
+                     type: string
+                     description: the group's name
             parameters:
               - in: body
                 name: body
@@ -52,6 +59,11 @@ objects.
                             type: string
                           postalcode:
                             type: string
+                    groups:
+                      type: array
+                      description: list of groups
+                      items:
+                        $ref: "#/definitions/Group"
             responses:
               201:
                 description: User created
