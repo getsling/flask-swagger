@@ -94,6 +94,50 @@ def bla():
     """
     return jsonify(['hacky'])
 
+class PetAPI(MethodView):
+
+    def get(self, pet_id):
+        """
+        Get a pet.
+
+        This is an example of how to use references and factored out definitions
+        ---
+        tags:
+          - pets
+        parameters:
+          - in: path
+            name: pet_id
+        definitions:
+          - schema:
+              id: Pet
+              required:
+                - name
+                - owner
+              properties:
+                name:
+                  type: string
+                  description: the pet's name
+                owner:
+                  $ref: '#/definitions/Owner'
+          - schema:
+              id: Owner
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: the owner's name
+        responses:
+          200:
+            description: Returns the specified pet
+            $ref: '#/definitions/Pet'
+        """
+        return {}
+
+pet_view = PetAPI.as_view('pets')
+app.add_url_rule('/pets/<int:pet_id>', view_func=pet_view, methods=["GET"])
+
+
 @app.route("/")
 def hello():
     return "Hello World!"
