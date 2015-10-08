@@ -16,6 +16,13 @@ class UserAPI(MethodView):
         ---
         tags:
           - users
+        definitions:
+          - schema:
+              id: Group
+              properties:
+                name:
+                 type: string
+                 description: the group's name
         parameters:
           - in: body
             name: body
@@ -44,6 +51,11 @@ class UserAPI(MethodView):
                         type: string
                       postalcode:
                         type: string
+                groups:
+                  type: array
+                  description: list of groups
+                  items:
+                    $ref: "#/definitions/Group"
         responses:
           201:
             description: User created
@@ -56,7 +68,9 @@ Following YAML conventions, flask-swagger searches for `---`, everything precedi
 
 In order to support inline definition of [Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects in [Parameter](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#parameterObject)  and [Response](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#responsesObject) objects, flask-swagger veers a little off from the standard. We require an `id` field for the inline Schema which is then used to correctly place the [Schema](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) object in the [Definitions](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#definitionsObject) object.
 
-[Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects can also be defined within the properties of other [Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects . An example is shown above with the address property of User.
+
+[Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects can be defined in a definitions section within the docstrings (see group object above) or within responses or parameters (see user object above). We also support schema objects nested within the properties of other [Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects. An example is shown above with the address property of User.
+
 
 To expose your Swagger specification to the world you provide a Flask route that does something along these lines
 

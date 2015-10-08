@@ -24,6 +24,13 @@ objects.
             ---
             tags:
               - users
+            definitions:
+              - schema:
+                  id: Group
+                  properties:
+                    name:
+                     type: string
+                     description: the group's name
             parameters:
               - in: body
                 name: body
@@ -52,6 +59,11 @@ objects.
                             type: string
                           postalcode:
                             type: string
+                    groups:
+                      type: array
+                      description: list of groups
+                      items:
+                        $ref: "#/definitions/Group"
             responses:
               201:
                 description: User created
@@ -83,7 +95,7 @@ object in the
 object.
 
 `Schema <https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject>`__
-objects can also be defined within the properties of other __
+objects can be defined in a definitions section within the docstrings (see group object above) or within responses or parameters (see user object above). We alo support schema objects nested within the properties of other
 `Schema <https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject>`__
 objects. An example is shown above with the address property of User.
 
