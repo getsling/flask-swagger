@@ -12,6 +12,7 @@ import re
 
 from collections import defaultdict
 
+
 def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
 
@@ -87,7 +88,7 @@ def _extract_definitions(alist, level=None):
     return defs
 
 
-def swagger(app, process_doc=_sanitize):
+def swagger(app, process_doc=_sanitize, template=None):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -103,8 +104,8 @@ def swagger(app, process_doc=_sanitize):
 
     Keyword arguments:
     process_doc -- text sanitization method, the default simply replaces \n with <br>
+    template -- The spec to start with and update as flask-swagger finds paths.
     """
-
     output = {
         "swagger": "2.0",
         "info": {
@@ -114,6 +115,17 @@ def swagger(app, process_doc=_sanitize):
         "paths": defaultdict(dict),
         "definitions": defaultdict(dict)
     }
+    # set defaults from template
+    if template is not None:
+        for tkey, tval in template.items():
+            if tkey == 'definitions':
+                for k, v in tval.items():
+                    output['definitions'][k] = v
+            if tkey == 'paths':
+                for k, v in tval.items():
+                    output['paths'][k] = v
+            else:
+                output[tkey] = tval
 
     paths = output['paths']
     definitions = output['definitions']
