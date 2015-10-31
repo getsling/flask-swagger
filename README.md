@@ -100,6 +100,27 @@ def spec():
 
 Swagger-UI is the reason we embarked on this mission to begin with, flask-swagger does not however include Swagger-UI. Simply follow the awesome documentation over at https://github.com/swagger-api/swagger-ui and point your [swaggerUi.url](https://github.com/swagger-api/swagger-ui#swaggerui) to your new flask-swagger endpoint and enjoy.
 
+## flaskswagger Command
+This package now comes with a very simple command line interface: flaskswagger. This command can be used to build and update swagger specs for your flask apps from the command line or at build time.
+
+```
+flaskswagger -h
+usage: flaskswagger [-h] [--template TEMPLATE] [--out-dir OUT_DIR] app
+
+positional arguments:
+  app                  the flask app to swaggerify
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --template TEMPLATE  template spec to start with
+  --out-dir OUT_DIR    the directory to output to
+```
+
+For example, this can be used to build a swagger spec which can be served from your static directory. In the example below, we use the manually created swagger.json.manual as a template, and output to the `static/` directory.
+
+```
+flaskswagger server:app --template static/swagger.json.manual --out-dir static/
+```
 
 Acknowledgements
 
