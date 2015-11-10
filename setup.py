@@ -18,5 +18,25 @@ setup(name='flask-swagger',
       entry_points = """
       [console_scripts]
       flaskswagger = build_swagger_spec:run
-      """
+      """,
+      options={
+        'bdist_rpm':{
+          'build_requires':[
+            'python',
+            'python-setuptools',
+            'python-itsdangerous',
+            'python-flask',
+            'python-markupsafe',
+            'PyYAML',
+          ],
+          'requires':[
+            'python',
+            'python-setuptools',
+            'python-itsdangerous',
+            'python-flask',
+            'python-markupsafe',
+            'PyYAML',
+          ],
+        },
+      },
       )
