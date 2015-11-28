@@ -1,7 +1,11 @@
+import os
+import sys
 import argparse
 import json
 import pkg_resources
 from flask_swagger import swagger
+
+sys.path.append(os.getcwd())
 
 parser = argparse.ArgumentParser()
 parser.add_argument('app', help='the flask app to swaggerify')
