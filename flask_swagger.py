@@ -111,24 +111,20 @@ def swagger(app, process_doc=_sanitize, template=None):
         "info": {
             "version": "0.0.0",
             "title": "Cool product name",
-        },
-        "paths": defaultdict(dict),
-        "definitions": defaultdict(dict)
+        }
     }
-    # set defaults from template
+    paths = defaultdict(dict)
+    definitions = defaultdict(dict)
     if template is not None:
-        for tkey, tval in template.items():
-            if tkey == 'definitions':
-                for k, v in tval.items():
-                    output['definitions'][k] = v
-            if tkey == 'paths':
-                for k, v in tval.items():
-                    output['paths'][k] = v
-            else:
-                output[tkey] = tval
+        output.update(template)
+        # check for template provided paths and definitions
+        for k,v in output.get('paths',{}).iteritems():
+           paths[k] = v
+        for k,v in output.get('definitions',{}).iteritems():
+           definitions[k] = v
+    output["paths"] = paths
+    output["definitions"] = definitions
 
-    paths = output['paths']
-    definitions = output['definitions']
     ignore_verbs = {"HEAD", "OPTIONS"}
     # technically only responses is non-optional
     optional_fields = ['tags', 'consumes', 'produces', 'schemes', 'security',
