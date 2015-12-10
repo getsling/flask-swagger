@@ -136,7 +136,7 @@ def swagger(app, process_doc=_sanitize, template=None):
         for verb in rule.methods.difference(ignore_verbs):
             if hasattr(endpoint, 'methods') and verb in endpoint.methods:
                 verb = verb.lower()
-                methods[verb] = endpoint.view_class.__dict__.get(verb)
+                methods[verb] = getattr(endpoint.view_class, verb)
             else:
                 methods[verb.lower()] = endpoint
         operations = dict()
