@@ -174,7 +174,7 @@ def swagger(app, process_doc=_sanitize, template=None):
 
         if len(operations):
             rule = str(rule)
-            for arg in re.findall('(<(.*?\:)?(.*?)>)', rule):
+            for arg in re.findall('(<([^<>]*:)?([^<>]*)>)', rule):
                 rule = rule.replace(arg[0], '{%s}' % arg[2])
             paths[rule].update(operations)
     return output
