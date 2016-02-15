@@ -23,7 +23,7 @@ def run():
     else:
         spec = swagger(app)
     if args.out_dir is None:
-        print json.dumps(spec, indent=4)
+        print(json.dumps(spec, indent=4))
     else:
         with open("%s/swagger.json" % args.out_dir, 'w') as f:
             f.write(json.dumps(spec, indent=4))
