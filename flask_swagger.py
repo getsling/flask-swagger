@@ -118,9 +118,9 @@ def swagger(app, process_doc=_sanitize, template=None):
     if template is not None:
         output.update(template)
         # check for template provided paths and definitions
-        for k,v in output.get('paths',{}).iteritems():
+        for k,v in output.get('paths',{}).items():
            paths[k] = v
-        for k,v in output.get('definitions',{}).iteritems():
+        for k,v in output.get('definitions',{}).items():
            definitions[k] = v
     output["paths"] = paths
     output["definitions"] = definitions
