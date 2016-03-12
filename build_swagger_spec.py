@@ -27,22 +27,22 @@ def run():
         with open(args.template, 'r') as f:
             template = json.loads(f.read())
 
-    # overwrite template with specified arguments
-    if args.definitions is not None:
-        with open(args.definitions, 'r') as f:
-            rawdefs = json.loads(f.read())
-            if 'definitions' in rawdefs:
-                rawdefs = rawdefs['definitions']
-            for d in rawdefs.keys():
-                template['definitions'][d] = rawdefs[d]
-    if args.host is not None:
-        template['host'] = args.host
-    if args.base_path is not None:
-        template['basePath'] = args.base_path
-    if args.version is not None:
-        template['info']['version'] = args.version
+        # overwrite template with specified arguments
+        if args.definitions is not None:
+            with open(args.definitions, 'r') as f:
+                rawdefs = json.loads(f.read())
+                if 'definitions' in rawdefs:
+                    rawdefs = rawdefs['definitions']
+                for d in rawdefs.keys():
+                    template['definitions'][d] = rawdefs[d]
 
     spec = swagger(app, template=template)
+    if args.host is not None:
+        spec['host'] = args.host
+    if args.base_path is not None:
+        spec['basePath'] = args.base_path
+    if args.version is not None:
+        spec['info']['version'] = args.version
     if args.out_dir is None:
         print json.dumps(spec, indent=4)
     else:
