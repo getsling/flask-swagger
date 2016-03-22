@@ -2,12 +2,13 @@
 A Swagger 2.0 spec extractor for Flask
 
 Install:
-```
+
+```shell
 pip install flask-swagger
 ```
 Flask-swagger provides a method (swagger) that inspects the Flask app for endpoints that contain YAML docstrings with Swagger 2.0 [Operation](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#operation-object) objects.
 
-```
+```python
 class UserAPI(MethodView):
 
     def post(self):
@@ -74,7 +75,7 @@ In order to support inline definition of [Schema ](https://github.com/swagger-ap
 
 To expose your Swagger specification to the world you provide a Flask route that does something along these lines
 
-```
+```python
 from flask import Flask, jsonify
 from flask_swagger import swagger
 
@@ -86,7 +87,8 @@ def spec():
 ```
 
 Note that the Swagger specification returned by `swagger(app)` is as minimal as it can be. It's your job to override and add to the specification as you see fit.
-```
+
+```python
 @app.route("/spec")
 def spec():
     swag = swagger(app)
@@ -103,8 +105,11 @@ Swagger-UI is the reason we embarked on this mission to begin with, flask-swagge
 ## flaskswagger Command
 This package now comes with a very simple command line interface: flaskswagger. This command can be used to build and update swagger specs for your flask apps from the command line or at build time.
 
-```
+```shell
 flaskswagger -h
+```
+
+```
 usage: flaskswagger [-h] [--template TEMPLATE] [--out-dir OUT_DIR] app
 
 positional arguments:
@@ -118,7 +123,7 @@ optional arguments:
 
 For example, this can be used to build a swagger spec which can be served from your static directory. In the example below, we use the manually created swagger.json.manual as a template, and output to the `static/` directory.
 
-```
+```shell
 flaskswagger server:app --template static/swagger.json.manual --out-dir static/
 ```
 
