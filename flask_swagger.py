@@ -17,21 +17,53 @@ def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
 
 
-def _parse_docstring(obj, process_doc):
+def _get_swag(doc, process_doc):
+    first_line, other_lines, swag = None, None, None
+    if doc:
+        line_feed = doc.find('\n')
+        if line_feed != -1:
+            first_line = process_doc(doc[:line_feed])
+            yaml_sep = doc[line_feed+1:].find('---')
+            if yaml_sep != -1:
+                other_lines = process_doc(doc[line_feed+1:line_feed+yaml_sep])
+                swag = yaml.load(doc[line_feed+yaml_sep:])
+            else:
+                other_lines = process_doc(doc[line_feed+1:])
+        else:
+            first_line = doc
+    return first_line, other_lines, swag
+
+
+def _parse_docstring(obj, process_doc, current_verb, verbs):
     first_line, other_lines, swag = None, None, None
     full_doc = inspect.getdoc(obj)
     if full_doc:
-        line_feed = full_doc.find('\n')
-        if line_feed != -1:
-            first_line = process_doc(full_doc[:line_feed])
-            yaml_sep = full_doc[line_feed+1:].find('---')
-            if yaml_sep != -1:
-                other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
-                swag = yaml.load(full_doc[line_feed+yaml_sep:])
-            else:
-                other_lines = process_doc(full_doc[line_feed+1:])
+        # check if verbs are defined in doc
+        indexes = []
+        current_verb_index = None
+        for v in verbs:
+            index = full_doc.find(v+':')
+            if index != -1:
+                indexes.append(index)
+                if v == current_verb:
+                    current_verb_index = index
+        indexes.sort()
+        if indexes:
+            if current_verb_index is not None:
+                start = indexes[indexes.index(current_verb_index)]
+                end = indexes[start+1] if start < len(indexes)+1 else None
+                # skip the verb line
+                start += full_doc[start:end].find('\n')+1
+                temp_doc = full_doc[start:end]
+                # remove indentation
+                first_line = temp_doc.split('\n')[0]
+                indentation = len(first_line) - len(first_line.lstrip())
+                doc = ""
+                for line in temp_doc.split('\n'):
+                    doc += line[indentation:]+'\n'
+                first_line, other_lines, swag = _get_swag(doc, process_doc)
         else:
-            first_line = full_doc
+            first_line, other_lines, swag = _get_swag(full_doc, process_doc)
     return first_line, other_lines, swag
 
 
@@ -140,8 +172,9 @@ def swagger(app, process_doc=_sanitize, template=None):
             else:
                 methods[verb.lower()] = endpoint
         operations = dict()
+        verbs = [k for k in methods.keys()]
         for verb, method in methods.items():
-            summary, description, swag = _parse_docstring(method, process_doc)
+            summary, description, swag = _parse_docstring(method, process_doc, verb, verbs)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)
