@@ -50,11 +50,12 @@ def _parse_docstring(obj, process_doc, current_verb, verbs):
         indexes.sort()
         if indexes:
             if current_verb_index is not None:
-                start = indexes[indexes.index(current_verb_index)]
-                end = indexes[start+1] if start < len(indexes)+1 else None
+                start_index = indexes.index(current_verb_index)
+                end_index = start_index+1 if start_index+1 < len(indexes) else None
+                current_verb_stop = indexes[end_index] if end_index else None
                 # skip the verb line
-                start += full_doc[start:end].find('\n')+1
-                temp_doc = full_doc[start:end]
+                current_verb_index += full_doc[current_verb_index:current_verb_stop].find('\n')+1
+                temp_doc = full_doc[current_verb_index:current_verb_stop]
                 # remove indentation
                 first_line = temp_doc.split('\n')[0]
                 indentation = len(first_line) - len(first_line.lstrip())
