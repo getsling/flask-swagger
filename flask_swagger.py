@@ -88,7 +88,7 @@ def _extract_definitions(alist, level=None):
     return defs
 
 
-def swagger(app, process_doc=_sanitize, template=None):
+def swagger(app, prefix=None, process_doc=_sanitize, template=None):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -118,10 +118,10 @@ def swagger(app, process_doc=_sanitize, template=None):
     if template is not None:
         output.update(template)
         # check for template provided paths and definitions
-        for k,v in output.get('paths',{}).items():
-           paths[k] = v
-        for k,v in output.get('definitions',{}).items():
-           definitions[k] = v
+        for k, v in output.get('paths', {}).items():
+            paths[k] = v
+        for k, v in output.get('definitions', {}).items():
+            definitions[k] = v
     output["paths"] = paths
     output["definitions"] = definitions
 
@@ -131,6 +131,8 @@ def swagger(app, process_doc=_sanitize, template=None):
                        'deprecated', 'operationId', 'externalDocs']
 
     for rule in app.url_map.iter_rules():
+        if prefix and rule.rule[:len(prefix)] != prefix:
+            continue
         endpoint = app.view_functions[rule.endpoint]
         methods = dict()
         for verb in rule.methods.difference(ignore_verbs):
