@@ -47,6 +47,14 @@ class UserAPI(MethodView):
         """
         return {}
 
+    def put(self, user_id):
+        """
+        Update a user
+
+        swagger_from_file: user_put.yml
+        """
+        return {}
+
 
 @app.after_request
 def after_request(response):
