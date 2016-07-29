@@ -207,9 +207,3 @@ Flask-swagger builds on ideas and code from [flask-sillywalk](https://github.com
 Notable forks
 
 [Flasgger](https://github.com/rochacbruno/flasgger)
-
-### TODO
-
-- flake8
-- tests
-- add argument to build_swagger_spec
