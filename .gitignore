@@ -52,6 +52,3 @@ docs/_build/
 
 # PyBuilder
 target/
-
-# vim swap files
-.*.sw?
