@@ -48,11 +48,12 @@ def _parse_docstring(obj, process_doc, from_file_keyword):
     first_line, other_lines, swag = None, None, None
     full_doc = inspect.getdoc(obj)
     if full_doc:
-        from_file = _find_from_file(full_doc, from_file_keyword)
-        if from_file:
-            full_doc_from_file = _doc_from_file(from_file)
-            if full_doc_from_file:
-                full_doc = full_doc_from_file
+        if from_file_keyword is not None:
+            from_file = _find_from_file(full_doc, from_file_keyword)
+            if from_file:
+                full_doc_from_file = _doc_from_file(from_file)
+                if full_doc_from_file:
+                    full_doc = full_doc_from_file
         line_feed = full_doc.find('\n')
         if line_feed != -1:
             first_line = process_doc(full_doc[:line_feed])
@@ -121,7 +122,7 @@ def _extract_definitions(alist, level=None):
 
 
 def swagger(app, prefix=None, process_doc=_sanitize,
-            from_file_keyword='swagger_from_file', template=None):
+            from_file_keyword=None, template=None):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
