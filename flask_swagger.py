@@ -17,10 +17,43 @@ def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
 
 
-def _parse_docstring(obj, process_doc):
+def _find_from_file(full_doc, from_file_keyword):
+    """
+    Finds a line in <full_doc> like
+
+        <from_file_keyword> <colon> <path>
+
+    and return path
+    """
+    path = None
+
+    for line in full_doc.splitlines():
+        if from_file_keyword in line:
+            parts = line.strip().split(':')
+            if len(parts) == 2 and parts[0].strip() == from_file_keyword:
+                path = parts[1].strip()
+                break
+
+    return path
+
+
+def _doc_from_file(path):
+    doc = None
+    with open(path) as f:
+        doc = f.read()
+    return doc
+
+
+def _parse_docstring(obj, process_doc, from_file_keyword):
     first_line, other_lines, swag = None, None, None
     full_doc = inspect.getdoc(obj)
     if full_doc:
+        if from_file_keyword is not None:
+            from_file = _find_from_file(full_doc, from_file_keyword)
+            if from_file:
+                full_doc_from_file = _doc_from_file(from_file)
+                if full_doc_from_file:
+                    full_doc = full_doc_from_file
         line_feed = full_doc.find('\n')
         if line_feed != -1:
             first_line = process_doc(full_doc[:line_feed])
@@ -88,7 +121,8 @@ def _extract_definitions(alist, level=None):
     return defs
 
 
-def swagger(app, prefix=None, process_doc=_sanitize, template=None):
+def swagger(app, prefix=None, process_doc=_sanitize,
+            from_file_keyword=None, template=None):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -104,6 +138,7 @@ def swagger(app, prefix=None, process_doc=_sanitize, template=None):
 
     Keyword arguments:
     process_doc -- text sanitization method, the default simply replaces \n with <br>
+    from_file_keyword -- how to specify a file to load doc from
     template -- The spec to start with and update as flask-swagger finds paths.
     """
     output = {
@@ -143,7 +178,8 @@ def swagger(app, prefix=None, process_doc=_sanitize, template=None):
                 methods[verb.lower()] = endpoint
         operations = dict()
         for verb, method in methods.items():
-            summary, description, swag = _parse_docstring(method, process_doc)
+            summary, description, swag = _parse_docstring(method, process_doc,
+                                                          from_file_keyword)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)

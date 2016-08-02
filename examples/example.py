@@ -47,6 +47,14 @@ class UserAPI(MethodView):
         """
         return {}
 
+    def put(self, user_id):
+        """
+        Update a user
+
+        swagger_from_file: user_put.yml
+        """
+        return {}
+
 
 @app.after_request
 def after_request(response):
@@ -144,7 +152,7 @@ def hello():
 
 @app.route("/spec")
 def spec():
-    return jsonify(swagger(app))
+    return jsonify(swagger(app, from_file_keyword='swagger_from_file'))
 
 if __name__ == "__main__":
     app.run(debug=True)

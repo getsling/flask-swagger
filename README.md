@@ -72,6 +72,79 @@ In order to support inline definition of [Schema ](https://github.com/swagger-ap
 
 [Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects can be defined in a definitions section within the docstrings (see group object above) or within responses or parameters (see user object above). We also support schema objects nested within the properties of other [Schema ](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md#schemaObject) objects. An example is shown above with the address property of User.
 
+If you don't like to put YAML on docstrings you can put the same content in an external file.
+
+#### file.yml
+```yaml
+Create a new user
+---
+tags:
+  - users
+definitions:
+  - schema:
+      id: Group
+      properties:
+        name:
+         type: string
+         description: the group's name
+parameters:
+  - in: body
+    name: body
+    schema:
+      id: User
+      required:
+        - email
+        - name
+      properties:
+        email:
+          type: string
+          description: email for user
+        name:
+          type: string
+          description: name for user
+        address:
+          description: address for user
+          schema:
+            id: Address
+            properties:
+              street:
+                type: string
+              state:
+                type: string
+              country:
+                type: string
+              postalcode:
+                type: string
+        groups:
+          type: array
+          description: list of groups
+          items:
+            $ref: "#/definitions/Group"
+responses:
+  201:
+    description: User created
+```
+
+and point to it in your docstring.
+
+```python
+class UserAPI(MethodView):
+
+    def post(self):
+        """
+        Create a new user
+
+        blah blah
+
+        swagger_from_file: path/to/file.yml
+
+        blah blah
+        """
+        return {}
+```
+
+Note that you can replace `swagger_from_file` by another keyword. Supply your chosen keyword as an argument to swagger. 
+
 
 To expose your Swagger specification to the world you provide a Flask route that does something along these lines
 

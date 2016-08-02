@@ -1,0 +1,22 @@
+Update a user
+---
+tags:
+  - users
+parameters:
+  - in: body
+    name: body
+    schema:
+      id: User
+      required:
+        - email
+        - name
+      properties:
+        email:
+          type: string
+          description: email for user
+        name:
+          type: string
+          description: name for user
+responses:
+  204:
+    description: User updated
