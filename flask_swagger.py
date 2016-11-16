@@ -171,11 +171,13 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         endpoint = app.view_functions[rule.endpoint]
         methods = dict()
         for verb in rule.methods.difference(ignore_verbs):
-            if hasattr(endpoint, 'methods') and verb in endpoint.methods and hasattr(endpoint.view_class, verb.lower()):
-                verb = verb.lower()
+            verb = verb.lower()
+            if hasattr(endpoint, 'methods') \
+                    and verb in map(lambda m: m.lower(), endpoint.methods) \
+                    and hasattr(endpoint.view_class, verb):
                 methods[verb] = getattr(endpoint.view_class, verb)
             else:
-                methods[verb.lower()] = endpoint
+                methods[verb] = endpoint
         operations = dict()
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
