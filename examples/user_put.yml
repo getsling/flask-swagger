@@ -1,4 +1,4 @@
-Update a user
+Update a user in yml
 ---
 tags:
   - users
@@ -17,6 +17,11 @@ parameters:
         name:
           type: string
           description: name for user
+  - name: filename
+    in: formData
+    description: filename of the yaml or python script used for training. This is not used as there's a filename already.
+    required: true
+    type: string
 responses:
   204:
     description: User updated

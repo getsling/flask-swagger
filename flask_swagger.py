@@ -17,24 +17,27 @@ def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
 
 
-def _find_from_file(full_doc, from_file_keyword):
+def _find_and_remove_from_file(full_doc, from_file_keyword):
     """
     Finds a line in <full_doc> like
 
         <from_file_keyword> <colon> <path>
 
-    and return path
+    and return path. Also remove the line from the docstring.
     """
     path = None
 
-    for line in full_doc.splitlines():
+    full_doc_lines = full_doc.splitlines()
+    for line_count in xrange(len(full_doc_lines) - 1, -1, -1):
+        line = full_doc_lines[line_count]
         if from_file_keyword in line:
             parts = line.strip().split(':')
             if len(parts) == 2 and parts[0].strip() == from_file_keyword:
                 path = parts[1].strip()
+                del full_doc_lines[line_count]
                 break
 
-    return path
+    return path, '\n'.join(full_doc_lines)
 
 
 def _doc_from_file(path):
@@ -44,27 +47,88 @@ def _doc_from_file(path):
     return doc
 
 
+def _merge_swag(swag, doc_swag):
+    # recursively update any dicts that are the same
+    if isinstance(swag, dict) and isinstance(doc_swag, dict):
+        for key, val in doc_swag.items():
+            if key not in swag:
+                swag[key] = val
+            else:
+                swag[key] = _merge_swag(swag[key], val)
+    # if there are multiple params for each type, then
+    # we'll check the `name` to see what to override, if anything
+    elif isinstance(swag, list) and isinstance(doc_swag, list):
+        # AFAIK both lists should contain the same datatype
+        if not swag:
+            swag = doc_swag
+        # for strings and lists, we'll go with the default swag
+        # for dicts, we'll add doc_swag to our swag if there's a `name` val
+        # that's not in any of the swag dicts
+        elif swag and isinstance(swag[0], dict):
+            # grab all the names of the dict objs
+            swag_names = []
+            for item in swag:
+                name = [val for key, val in item.items() if key == 'name']
+                if name:
+                    swag_names.append(name[0])
+            for doc_item in doc_swag:
+                name = doc_item.get('name')
+                if name is not None:
+                    if name not in swag_names:
+                        swag.append(doc_item)
+                else:
+                    # if there's no name, then there's no way to check for
+                    # uniqueness. Assume unique.
+                    swag.append(doc_item)
+    return swag
+
+
+def _merge_template(doc_template, process_doc, summary, desc, swag):
+    doc_summary, doc_desc, doc_swag = _get_docstring_parts(
+        doc_template, process_doc)
+    # favor everything from the original docstring
+    if not summary:
+        summary = doc_summary
+    if not desc:
+        desc = doc_desc
+    if doc_swag:
+        if not swag:
+            swag = doc_swag
+        else:
+            _merge_swag(swag, doc_swag)
+    return summary, desc, swag
+
+
+def _get_docstring_parts(docstring, process_doc):
+    other_lines, swag = None, None
+    line_feed = docstring.find('\n')
+    if line_feed != -1:
+        first_line = process_doc(docstring[:line_feed])
+        yaml_sep = docstring[line_feed+1:].find('---')
+        if yaml_sep != -1:
+            other_lines = process_doc(docstring[line_feed+1:line_feed+yaml_sep])
+            swag = yaml.load(docstring[line_feed+yaml_sep:])
+        else:
+            other_lines = process_doc(docstring[line_feed+1:])
+    else:
+        first_line = docstring
+    return first_line, other_lines, swag
+
+
 def _parse_docstring(obj, process_doc, from_file_keyword):
-    first_line, other_lines, swag = None, None, None
+    first_line, other_lines, swag, doc_template = None, None, None, None
     full_doc = inspect.getdoc(obj)
     if full_doc:
         if from_file_keyword is not None:
-            from_file = _find_from_file(full_doc, from_file_keyword)
+            from_file, full_doc = _find_and_remove_from_file(
+                full_doc, from_file_keyword)
             if from_file:
-                full_doc_from_file = _doc_from_file(from_file)
-                if full_doc_from_file:
-                    full_doc = full_doc_from_file
-        line_feed = full_doc.find('\n')
-        if line_feed != -1:
-            first_line = process_doc(full_doc[:line_feed])
-            yaml_sep = full_doc[line_feed+1:].find('---')
-            if yaml_sep != -1:
-                other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
-                swag = yaml.load(full_doc[line_feed+yaml_sep:])
-            else:
-                other_lines = process_doc(full_doc[line_feed+1:])
-        else:
-            first_line = full_doc
+                doc_template = _doc_from_file(from_file)
+        first_line, other_lines, swag = _get_docstring_parts(
+            full_doc, process_doc)
+        if doc_template:
+            first_line, other_lines, swag = _merge_template(
+                doc_template, process_doc, first_line, other_lines, swag)
     return first_line, other_lines, swag
 
 
