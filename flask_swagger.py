@@ -65,7 +65,6 @@ def _merge_swag(swag, doc_swag):
         # for dicts, we'll add doc_swag to our swag if there's a `name` val
         # that's not in any of the swag dicts
         elif swag and isinstance(swag[0], dict):
-            # grab all the names of the dict objs
             swag_names = []
             for item in swag:
                 name = [val for key, val in item.items() if key == 'name']

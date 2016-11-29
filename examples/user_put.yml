@@ -1,4 +1,4 @@
-Update a user in yml
+Update a user from yml. This is not used.
 ---
 tags:
   - users
