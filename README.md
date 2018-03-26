@@ -10,7 +10,7 @@ def spec():
     base_path = os.path.join(app.root_path, 'docs')
     return jsonify(swagger(app), from_file_keyword="swagger_from_file", base_path=base_path)
 ```
-and use relative pathes:
+and use relative paths:
 ```
 @app.route('/test', methods=['POST'])
 def login():
