@@ -182,6 +182,12 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
                                                           from_file_keyword)
+            if hasattr(method, 'summary'):
+                summary = method.summary
+            if hasattr(method, 'description'):
+                description = method.description
+            if hasattr(method, 'swag'):
+                swag = method.swag
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)
