@@ -14,7 +14,7 @@ setup(name='flask-swagger',
       license='MIT',
       py_modules=['flask_swagger', 'build_swagger_spec'],
       long_description=long_description,
-      install_requires=['Flask>=0.10', 'PyYAML>=3.0'],
+      install_requires=['Flask>=0.10', 'PyYAML>=5.1'],
       classifiers=[
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',

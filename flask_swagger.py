@@ -60,7 +60,7 @@ def _parse_docstring(obj, process_doc, from_file_keyword):
             yaml_sep = full_doc[line_feed+1:].find('---')
             if yaml_sep != -1:
                 other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
-                swag = yaml.load(full_doc[line_feed+yaml_sep:])
+                swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
             else:
                 other_lines = process_doc(full_doc[line_feed+1:])
         else:
