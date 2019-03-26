@@ -183,21 +183,36 @@ flaskswagger -h
 ```
 
 ```
-usage: flaskswagger [-h] [--template TEMPLATE] [--out-dir OUT_DIR] app
+usage: flaskswagger [-h] [--template TEMPLATE] [--out-dir OUT_DIR]
+                    [--definitions DEFINITIONS] [--host HOST]
+                    [--base-path BASE_PATH] [--version VERSION]
+                    app
 
 positional arguments:
-  app                  the flask app to swaggerify
+  app                   the flask app to swaggerify
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --template TEMPLATE  template spec to start with
-  --out-dir OUT_DIR    the directory to output to
+  -h, --help            show this help message and exit
+  --template TEMPLATE   template spec to start with, before any other options
+                        or processing
+  --out-dir OUT_DIR     the directory to output to
+  --definitions DEFINITIONS
+                        json definitions file
+  --host HOST
+  --base-path BASE_PATH
+  --version VERSION     Specify a spec version
+
 ```
 
 For example, this can be used to build a swagger spec which can be served from your static directory. In the example below, we use the manually created swagger.json.manual as a template, and output to the `static/` directory.
 
 ```shell
 flaskswagger server:app --template static/swagger.json.manual --out-dir static/
+```
+Also, you can ask flaskswagger to add host and basePath to your swagger spec:  
+
+```shell
+flaskswagger server:app --host localhost:5000 --base-path /v1
 ```
 
 Acknowledgements
