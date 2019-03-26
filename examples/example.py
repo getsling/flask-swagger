@@ -49,9 +49,32 @@ class UserAPI(MethodView):
 
     def put(self, user_id):
         """
-        Update a user
+        Update a user, this summary stays
 
         swagger_from_file: user_put.yml
+
+        ---
+        tags:
+          - user_update
+        parameters:
+          - name: filename
+            in: formData
+            description: filename. this overrides what's in the .yml file
+            required: false
+            type: string
+          - name: username
+            in: formData
+            description: username
+            required: false
+            type: file
+          - name: password
+            in: formData
+            description: password
+            required: false
+            type: file
+        responses:
+          200:
+            description: this description stays
         """
         return {}
 
