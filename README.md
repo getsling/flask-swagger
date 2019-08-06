@@ -1,7 +1,7 @@
-# flask-swagger (fork)
+# flask-swagger
 A Swagger 2.0 spec extractor for Flask
 
-Using this fork you can now specify base path for yml files:
+You can now specify base path for yml files:
 ```
 app = Flask(__name__)
 
