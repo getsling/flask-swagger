@@ -177,7 +177,7 @@ def swagger(app, prefix=None, process_doc=_sanitize,
             if hasattr(endpoint, 'methods') and verb in endpoint.methods:
                 methods[verb] = getattr(endpoint.view_class, verb)
             else:
-                methods[verb.lower()] = endpoint
+                methods[verb] = endpoint
         operations = dict()
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
