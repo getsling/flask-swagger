@@ -173,8 +173,8 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         endpoint = app.view_functions[rule.endpoint]
         methods = dict()
         for verb in rule.methods.difference(ignore_verbs):
+            verb = verb.lower()
             if hasattr(endpoint, 'methods') and verb in endpoint.methods:
-                verb = verb.lower()
                 methods[verb] = getattr(endpoint.view_class, verb)
             else:
                 methods[verb.lower()] = endpoint
