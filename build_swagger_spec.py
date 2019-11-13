@@ -19,7 +19,7 @@ parser.add_argument('--version', default=None, help='Specify a spec version')
 args = parser.parse_args()
 
 def run():
-    app = pkg_resources.EntryPoint.parse("x=%s" % args.app).load(False)
+    app = pkg_resources.EntryPoint.parse("x=%s" % args.app).resolve()
 
     # load the base template
     template = None
