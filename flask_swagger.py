@@ -5,10 +5,12 @@ An endpoint that traverses all restful endpoints producing a swagger 2.0 schema
 If a swagger yaml description is found in the docstrings for an endpoint
 we add the endpoint to swagger specification output
 
+- Added basic_path parameter
 """
 import inspect
 import yaml
 import re
+import os
 
 from collections import defaultdict
 
@@ -17,7 +19,7 @@ def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
 
 
-def _find_from_file(full_doc, from_file_keyword):
+def _find_from_file(full_doc, from_file_keyword, base_path):
     """
     Finds a line in <full_doc> like
 
@@ -33,7 +35,7 @@ def _find_from_file(full_doc, from_file_keyword):
             if len(parts) == 2 and parts[0].strip() == from_file_keyword:
                 path = parts[1].strip()
                 break
-
+    path = path if not path else os.path.join(base_path, path)
     return path
 
 
@@ -44,12 +46,12 @@ def _doc_from_file(path):
     return doc
 
 
-def _parse_docstring(obj, process_doc, from_file_keyword):
+def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
     first_line, other_lines, swag = None, None, None
     full_doc = inspect.getdoc(obj)
     if full_doc:
         if from_file_keyword is not None:
-            from_file = _find_from_file(full_doc, from_file_keyword)
+            from_file = _find_from_file(full_doc, from_file_keyword, base_path)
             if from_file:
                 full_doc_from_file = _doc_from_file(from_file)
                 if full_doc_from_file:
@@ -122,7 +124,7 @@ def _extract_definitions(alist, level=None):
 
 
 def swagger(app, prefix=None, process_doc=_sanitize,
-            from_file_keyword=None, template=None):
+            from_file_keyword=None, template=None, base_path=""):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -173,7 +175,7 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         for verb in rule.methods.difference(ignore_verbs):
             verb = verb.lower()
             if hasattr(endpoint, 'methods') \
-                    and verb in map(lambda m: m.lower(), endpoint.methods) \
+                    and verb in map(lambda m: m.lower(), endpoint.methods) \	
                     and hasattr(endpoint.view_class, verb):
                 methods[verb] = getattr(endpoint.view_class, verb)
             else:
@@ -181,7 +183,7 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         operations = dict()
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
-                                                          from_file_keyword)
+                                                          from_file_keyword, base_path)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)
