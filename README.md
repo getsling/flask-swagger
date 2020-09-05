@@ -8,7 +8,7 @@ app = Flask(__name__)
 @app.route("/spec")
 def spec():
     base_path = os.path.join(app.root_path, 'docs')
-    return jsonify(swagger(app), from_file_keyword="swagger_from_file", base_path=base_path)
+    return jsonify(swagger(app, from_file_keyword="swagger_from_file", base_path=base_path))
 ```
 and use relative paths:
 ```
