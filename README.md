@@ -2,7 +2,7 @@
 A Swagger 2.0 spec extractor for Flask
 
 You can now specify base path for yml files:
-```
+```python
 app = Flask(__name__)
 
 @app.route("/spec")
@@ -11,7 +11,7 @@ def spec():
     return jsonify(swagger(app), from_file_keyword="swagger_from_file", base_path=base_path)
 ```
 and use relative paths:
-```
+```python
 @app.route('/test', methods=['POST'])
 def login():
     """
