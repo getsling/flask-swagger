@@ -15,8 +15,10 @@ parser.add_argument('--definitions', default=None, help='json definitions file')
 parser.add_argument('--host', default=None)
 parser.add_argument('--base-path', default=None)
 parser.add_argument('--version', default=None, help='Specify a spec version')
+parser.add_argument('--from-file-keyword', default=None, help='from file keyword')
 
 args = parser.parse_args()
+
 
 def run():
     app = pkg_resources.EntryPoint.parse("x=%s" % args.app).resolve()
@@ -36,7 +38,7 @@ def run():
                 for d in rawdefs.keys():
                     template['definitions'][d] = rawdefs[d]
 
-    spec = swagger(app, template=template)
+    spec = swagger(app, template=template, from_file_keyword=args.from_file_keyword)
     if args.host is not None:
         spec['host'] = args.host
     if args.base_path is not None:
