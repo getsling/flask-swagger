@@ -41,6 +41,8 @@ def generate_plantuml(docstring, app):
 
     subfolder = app.config.get(FLASK_SWAGGER_PLANTUML_FOLDER, 'uml')
     folder = os.path.join(app.static_folder, subfolder)
+    if not os.path.exists():
+        os.mkdir(folder)
     logger.info("Outputting diagrams to %s", folder)
 
     while True:
