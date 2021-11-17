@@ -1,13 +1,16 @@
 import hashlib
+import logging
 import os
 import re
+
+logger = logging.getLogger(__name__)
 
 try:
     import plantuml
 except ImportError:
     plantuml = None
 
-_PLANTUML_RE = re.compile("(@startuml.*?@enduml)")
+_PLANTUML_RE = re.compile("(@startuml.*?@enduml)", re.MULTILINE)
 FLASK_SWAGGER_PLANTUML_SERVER = 'FLASK_SWAGGER_PLANTUML_SERVER'
 FLASK_SWAGGER_PLANTUML_FOLDER = 'FLASK_SWAGGER_PLANTUML_FOLDER'
 
@@ -29,15 +32,20 @@ def generate_plantuml(docstring, app):
       image.
     """
     if not plantuml:
+        logger.info("PlantUML not installed; not generating diagrams")
         return docstring
 
-    if FLASK_SWAGGER_PLANTUML_SERVER in app.config:
-        server = plantuml.PlantUML(url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER'))
+    url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER')
+    if url:
+        logger.info("User PlantUML server %s", url)
+        server = plantuml.PlantUML(url=url)
     else:
+        logger.info("Using default public PlantUML server")
         server = plantuml.PlantUML()
 
     subfolder = app.config.get(FLASK_SWAGGER_PLANTUML_FOLDER, 'uml')
     folder = os.path.join(app.static_folder, subfolder)
+    logger.info("Outputting diagrams to %s", folder)
 
     while True:
         match = _PLANTUML_RE.search(docstring)
