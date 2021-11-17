@@ -50,7 +50,7 @@ def _doc_from_file(path):
     return doc
 
 
-def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
+def _parse_docstring(obj, process_doc, from_file_keyword, base_path, app):
     try:
         first_line, other_lines, swag = None, None, None
         full_doc = inspect.getdoc(obj)
@@ -67,7 +67,7 @@ def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
                 yaml_sep = full_doc[line_feed+1:].find('---')
                 if yaml_sep != -1:
                     other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
-                    other_lines = generate_plantuml(other_lines)
+                    other_lines = generate_plantuml(other_lines, app)
                     swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
                 else:
                     other_lines = process_doc(full_doc[line_feed+1:])
@@ -157,7 +157,7 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         "info": {
             "version": version,
             "title": title,
-            "description": generate_plantuml(description)
+            "description": generate_plantuml(description, app)
         }
     }
     paths = defaultdict(dict)
@@ -193,7 +193,8 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         operations = dict()
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
-                                                          from_file_keyword, base_path)
+                                                          from_file_keyword, base_path,
+                                                          app)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)
