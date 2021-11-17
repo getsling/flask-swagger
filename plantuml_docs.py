@@ -10,7 +10,7 @@ try:
 except ImportError:
     plantuml = None
 
-_PLANTUML_RE = re.compile("(@startuml.*?@enduml)", re.MULTILINE)
+_PLANTUML_RE = re.compile("(@startuml.*?@enduml)", re.MULTILINE|re.DOTALL)
 FLASK_SWAGGER_PLANTUML_SERVER = 'FLASK_SWAGGER_PLANTUML_SERVER'
 FLASK_SWAGGER_PLANTUML_FOLDER = 'FLASK_SWAGGER_PLANTUML_FOLDER'
 
@@ -49,7 +49,7 @@ def generate_plantuml(docstring, app):
             break
         uml = match.group(1)
         # The same UML data will produce the same filename
-        filename = hashlib.sha256(uml.encode('utf-8')).decode('utf-8') + '.png'
+        filename = hashlib.sha256(uml.encode('utf-8')).hexdigest() + '.png'
         output_file = os.path.join(folder, filename)
         try:
             image_data = server.processes(uml)
