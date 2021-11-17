@@ -35,13 +35,9 @@ def generate_plantuml(docstring, app):
         logger.info("PlantUML not installed; not generating diagrams")
         return docstring
 
-    url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER')
-    if url:
-        logger.info("User PlantUML server %s", url)
-        server = plantuml.PlantUML(url=url)
-    else:
-        logger.info("Using default public PlantUML server")
-        server = plantuml.PlantUML()
+    url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER', 'http://www.plantuml.com/plantuml/img/')
+    logger.info("User PlantUML server %s", url)
+    server = plantuml.PlantUML(url=url)
 
     subfolder = app.config.get(FLASK_SWAGGER_PLANTUML_FOLDER, 'uml')
     folder = os.path.join(app.static_folder, subfolder)
