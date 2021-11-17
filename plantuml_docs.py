@@ -14,6 +14,9 @@ _PLANTUML_RE = re.compile("(@startuml.*?@enduml)", re.MULTILINE|re.DOTALL)
 FLASK_SWAGGER_PLANTUML_SERVER = 'FLASK_SWAGGER_PLANTUML_SERVER'
 FLASK_SWAGGER_PLANTUML_FOLDER = 'FLASK_SWAGGER_PLANTUML_FOLDER'
 
+def sub(string, match, replacement):
+    return string[:match.start()] + replacement + string[match.end():]
+
 def generate_plantuml(docstring, app):
     """
     Generate PlantUML diagrams from the given docstring.
@@ -57,13 +60,13 @@ def generate_plantuml(docstring, app):
             image_data = server.processes(uml)
             with open(output_file, 'wb') as file:
                 file.write(image_data)
-            docstring = match.sub(f"![{filename}][/static/{subfolder}/{filename}]")
+            docstring = sub(docstring, match, f"![{filename}][/static/{subfolder}/{filename}]")
         except plantuml.PlantUMLConnectionError as e:
-            docstring = match.sub(f"Failed to connect to the PlantUML server: {e}")
+            docstring = sub(docstring, match, f"Failed to connect to the PlantUML server: {e}")
         except plantuml.PlantUMLHTTPError as e:
-            docstring = match.sub(f"HTTP error while connection to the PlantUML server: {e}")
+            docstring = sub(docstring, match, f"HTTP error while connection to the PlantUML server: {e}")
         except plantuml.PlantUMLError as e:
-            docstring = match.sub(f"PlantUML error: {e}")
+            docstring = sub(docstring, match, f"PlantUML error: {e}")
 
     return docstring
 
