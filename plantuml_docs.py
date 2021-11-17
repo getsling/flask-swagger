@@ -1,0 +1,64 @@
+import hashlib
+import os
+import re
+
+try:
+    import plantuml
+except ImportError:
+    plantuml = None
+
+_PLANTUML_RE = re.compile("(@startuml.*?@enduml)")
+FLASK_SWAGGER_PLANTUML_SERVER = 'FLASK_SWAGGER_PLANTUML_SERVER'
+FLASK_SWAGGER_PLANTUML_FOLDER = 'FLASK_SWAGGER_PLANTUML_FOLDER'
+
+def generate_plantuml(docstring, app):
+    """
+    Generate PlantUML diagrams from the given docstring.
+
+    If the plantuml Python package is not installed, the docstring is returned
+    unaltered.  Otherwise, it performs the following steps:
+    * Looks for any `@startuml...@enduml` pairs.
+    * When it finds one, extracts the diagram text and sends it to a PlantUML
+      server.  The default is the public server, but this can be configured by
+      setting the `FLASK_SWAGGER_PLANTUML_SERVER` in the flask app config.
+    * The image returned from the server is placed into the application's static
+      files folder.  The location of the static folder is determined from the
+      `app` object.  The subfolder defaults to `uml` but can be configured by
+      setting the `FLASK_SWAGGER_PLANTUML_FOLDER` in the flask app config.
+    * The original diagram text is replaced with a markdown link to the generated
+      image.
+    """
+    if not plantuml:
+        return docstring
+
+    if FLASK_SWAGGER_PLANTUML_SERVER in app.config:
+        server = plantuml.PlantUML(url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER'))
+    else:
+        server = plantuml.PlantUML()
+
+    subfolder = app.config.get(FLASK_SWAGGER_PLANTUML_FOLDER, 'uml')
+    folder = os.path.join(app.static_folder, subfolder)
+
+    while True:
+        match = _PLANTUML_RE.search(docstring)
+        if not match:
+            break
+        uml = match.group(1)
+        # The same UML data will produce the same filename
+        filename = hashlib.sha256(uml.encode('utf-8')).decode('utf-8') + '.png'
+        output_file = os.path.join(folder, filename)
+        try:
+            image_data = server.processes(uml)
+            with open(output_file, 'wb') as file:
+                file.write(image_data)
+            docstring = match.sub(f"![{filename}][/static/{subfolder}/{filename}]")
+        except plantuml.PlantUMLConnectionError as e:
+            docstring = match.sub(f"Failed to connect to the PlantUML server: {e}")
+        except plantuml.PlantUMLHTTPError as e:
+            docstring = match.sub(f"HTTP error while connection to the PlantUML server: {e}")
+        except plantuml.PlantUMLError as e:
+            docstring = match.sub(f"PlantUML error: {e}")
+
+    return docstring
+
+

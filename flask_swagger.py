@@ -15,6 +15,8 @@ import os
 
 from collections import defaultdict
 
+from plantuml_docs import generate_plantuml
+
 logger = logging.getLogger(__name__)
 
 def _sanitize(comment):
@@ -65,6 +67,7 @@ def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
                 yaml_sep = full_doc[line_feed+1:].find('---')
                 if yaml_sep != -1:
                     other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
+                    other_lines = generate_plantuml(other_lines)
                     swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
                 else:
                     other_lines = process_doc(full_doc[line_feed+1:])
@@ -129,7 +132,8 @@ def _extract_definitions(alist, level=None):
 
 
 def swagger(app, prefix=None, process_doc=_sanitize,
-            from_file_keyword=None, template=None, base_path=""):
+            from_file_keyword=None, template=None, base_path="",
+            title="Cool product name", version="0.0.0", description=""):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -151,8 +155,9 @@ def swagger(app, prefix=None, process_doc=_sanitize,
     output = {
         "swagger": "2.0",
         "info": {
-            "version": "0.0.0",
-            "title": "Cool product name",
+            "version": version,
+            "title": title,
+            "description": generate_plantuml(description)
         }
     }
     paths = defaultdict(dict)
