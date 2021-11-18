@@ -66,8 +66,9 @@ def _parse_docstring(obj, process_doc, from_file_keyword, base_path, app):
                 first_line = process_doc(full_doc[:line_feed])
                 yaml_sep = full_doc[line_feed+1:].find('---')
                 if yaml_sep != -1:
-                    other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
+                    other_lines = full_doc[line_feed+1:line_feed+yaml_sep]
                     other_lines = generate_plantuml(other_lines, app)
+                    other_lines = process_doc(other_lines)
                     swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
                 else:
                     other_lines = process_doc(full_doc[line_feed+1:])
