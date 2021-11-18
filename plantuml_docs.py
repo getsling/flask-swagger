@@ -60,7 +60,7 @@ def generate_plantuml(docstring, app):
             image_data = server.processes(uml)
             with open(output_file, 'wb') as file:
                 file.write(image_data)
-            docstring = sub(docstring, match, f'![{filename}](/static/{subfolder}/{filename}])')
+            docstring = sub(docstring, match, f'![{filename}](/static/{subfolder}/{filename})')
         except plantuml.PlantUMLConnectionError as e:
             docstring = sub(docstring, match, f"Failed to connect to the PlantUML server: {e}")
         except plantuml.PlantUMLHTTPError as e:
