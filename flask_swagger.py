@@ -73,6 +73,7 @@ def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
         return first_line, other_lines, swag
     except Exception as e:
         logger.error("Failed to parse docstring for %s: %s", obj, e)
+        raise
 
 
 def _extract_definitions(alist, level=None):
