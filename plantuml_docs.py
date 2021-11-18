@@ -35,18 +35,18 @@ def generate_plantuml(docstring, app):
       image.
     """
     if not plantuml:
-        logger.info("PlantUML not installed; not generating diagrams")
+        logger.debug("PlantUML not installed; not generating diagrams")
         return docstring
 
     url=app.config.get(FLASK_SWAGGER_PLANTUML_SERVER, 'http://www.plantuml.com/plantuml/img/')
-    logger.info("User PlantUML server %s", url)
+    logger.debug("Using PlantUML server %s", url)
     server = plantuml.PlantUML(url=url)
 
     subfolder = app.config.get(FLASK_SWAGGER_PLANTUML_FOLDER, 'uml')
     folder = os.path.join(app.static_folder, subfolder)
     if not os.path.exists(folder):
         os.mkdir(folder)
-    logger.info("Outputting diagrams to %s", folder)
+    logger.debug("Outputting diagrams to %s", folder)
 
     while True:
         match = _PLANTUML_RE.search(docstring)
