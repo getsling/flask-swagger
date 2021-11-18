@@ -38,7 +38,7 @@ def generate_plantuml(docstring, app):
         logger.info("PlantUML not installed; not generating diagrams")
         return docstring
 
-    url=app.config.get('FLASK_SWAGGER_PLANTUML_SERVER', 'http://www.plantuml.com/plantuml/img/')
+    url=app.config.get(FLASK_SWAGGER_PLANTUML_SERVER, 'http://www.plantuml.com/plantuml/img/')
     logger.info("User PlantUML server %s", url)
     server = plantuml.PlantUML(url=url)
 
