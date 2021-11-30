@@ -8,12 +8,16 @@ we add the endpoint to swagger specification output
 - Added basic_path parameter
 """
 import inspect
+import logging
 import yaml
 import re
 import os
 
 from collections import defaultdict
 
+from plantuml_docs import generate_plantuml
+
+logger = logging.getLogger(__name__)
 
 def _sanitize(comment):
     return comment.replace('\n', '<br/>') if comment else comment
@@ -46,28 +50,34 @@ def _doc_from_file(path):
     return doc
 
 
-def _parse_docstring(obj, process_doc, from_file_keyword, base_path):
-    first_line, other_lines, swag = None, None, None
-    full_doc = inspect.getdoc(obj)
-    if full_doc:
-        if from_file_keyword is not None:
-            from_file = _find_from_file(full_doc, from_file_keyword, base_path)
-            if from_file:
-                full_doc_from_file = _doc_from_file(from_file)
-                if full_doc_from_file:
-                    full_doc = full_doc_from_file
-        line_feed = full_doc.find('\n')
-        if line_feed != -1:
-            first_line = process_doc(full_doc[:line_feed])
-            yaml_sep = full_doc[line_feed+1:].find('---')
-            if yaml_sep != -1:
-                other_lines = process_doc(full_doc[line_feed+1:line_feed+yaml_sep])
-                swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
+def _parse_docstring(obj, process_doc, from_file_keyword, base_path, app):
+    try:
+        first_line, other_lines, swag = None, None, None
+        full_doc = inspect.getdoc(obj)
+        if full_doc:
+            if from_file_keyword is not None:
+                from_file = _find_from_file(full_doc, from_file_keyword, base_path)
+                if from_file:
+                    full_doc_from_file = _doc_from_file(from_file)
+                    if full_doc_from_file:
+                        full_doc = full_doc_from_file
+            line_feed = full_doc.find('\n')
+            if line_feed != -1:
+                first_line = process_doc(full_doc[:line_feed])
+                yaml_sep = full_doc[line_feed+1:].find('---')
+                if yaml_sep != -1:
+                    other_lines = full_doc[line_feed+1:line_feed+yaml_sep]
+                    other_lines = generate_plantuml(other_lines, app)
+                    other_lines = process_doc(other_lines)
+                    swag = yaml.full_load(full_doc[line_feed+yaml_sep:])
+                else:
+                    other_lines = process_doc(full_doc[line_feed+1:])
             else:
-                other_lines = process_doc(full_doc[line_feed+1:])
-        else:
-            first_line = full_doc
-    return first_line, other_lines, swag
+                first_line = full_doc
+        return first_line, other_lines, swag
+    except Exception as e:
+        logger.error("Failed to parse docstring for %s: %s", obj, e)
+        raise
 
 
 def _extract_definitions(alist, level=None):
@@ -124,7 +134,8 @@ def _extract_definitions(alist, level=None):
 
 
 def swagger(app, prefix=None, process_doc=_sanitize,
-            from_file_keyword=None, template=None, base_path=""):
+            from_file_keyword=None, template=None, base_path="",
+            title="Cool product name", version="0.0.0", description=""):
     """
     Call this from an @app.route method like this
     @app.route('/spec.json')
@@ -146,8 +157,9 @@ def swagger(app, prefix=None, process_doc=_sanitize,
     output = {
         "swagger": "2.0",
         "info": {
-            "version": "0.0.0",
-            "title": "Cool product name",
+            "version": version,
+            "title": title,
+            "description": generate_plantuml(description, app)
         }
     }
     paths = defaultdict(dict)
@@ -183,7 +195,8 @@ def swagger(app, prefix=None, process_doc=_sanitize,
         operations = dict()
         for verb, method in methods.items():
             summary, description, swag = _parse_docstring(method, process_doc,
-                                                          from_file_keyword, base_path)
+                                                          from_file_keyword, base_path,
+                                                          app)
             if swag is not None:  # we only add endpoints with swagger data in the docstrings
                 defs = swag.get('definitions', [])
                 defs = _extract_definitions(defs)

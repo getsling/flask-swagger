@@ -12,7 +12,7 @@ setup(name='flask-swagger',
       description='Extract swagger specs from your flask project',
       author='Atli Thorbjornsson',
       license='MIT',
-      py_modules=['flask_swagger', 'build_swagger_spec'],
+      py_modules=['flask_swagger', 'build_swagger_spec', 'plantuml_docs'],
       long_description=long_description,
       install_requires=['Flask>=0.10', 'PyYAML>=5.1'],
       classifiers=[
